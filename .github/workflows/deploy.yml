@@ -1,0 +1,39 @@
+name: Deploy Laravel to EC2
+
+on:
+  push:
+    branches:
+      - main  # deploy on push to main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Deploy to EC2
+      uses: appleboy/ssh-action@v0.1.6
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        port: 22
+        script: |
+          echo "Deploying Laravel app..."
+          cd /var/www/laravel
+          git reset --hard
+          git clean -fd
+          git pull origin main
+          composer install --no-dev --optimize-autoloader
+          php artisan migrate --force
+          php artisan config:clear
+          php artisan cache:clear
+          php artisan route:clear
+          php artisan view:clear
+          sudo chown -R ec2-user:apache storage bootstrap/cache
+          sudo chmod -R 775 storage bootstrap/cache
+          sudo systemctl restart php-fpm
+          sudo systemctl restart httpd
+          echo "Deployment complete!"
