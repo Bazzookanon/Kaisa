@@ -7,7 +7,7 @@
     <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Category Management</h5>
         <a href="{{ route('categories.create') }}" class="btn btn-light btn-sm">
-            <i class="bi bi-plus-lg"></i> Add Category Jonathan non
+            <i class="bi bi-plus-lg"></i> Add Category
         </a>
     </div>
 

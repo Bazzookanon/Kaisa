@@ -7,7 +7,7 @@
     <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Product Management</h5>
         <a href="{{ route('products.create') }}" class="btn btn-light btn-sm">
-            <i class="bi bi-plus-lg"></i> Add Product Jonathan Non
+            <i class="bi bi-plus-lg"></i> Add Product
         </a>
     </div>
 
