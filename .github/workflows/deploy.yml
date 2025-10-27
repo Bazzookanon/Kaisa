@@ -36,4 +36,4 @@ jobs:
           sudo chmod -R 775 storage bootstrap/cache
           sudo systemctl restart php-fpm
           sudo systemctl restart httpd
-          echo "Deployment complete and Success!"
+          echo "Deployment complete and Success nato gogogo!"
