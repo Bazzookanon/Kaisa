@@ -28,8 +28,6 @@ jobs:
           git pull origin main
           composer install --no-dev --optimize-autoloader
           php artisan migrate --force
-          php artisan telescope:install
-          composer update --ignore-platform-reqs
           php artisan config:clear
           php artisan cache:clear
           php artisan route:clear
