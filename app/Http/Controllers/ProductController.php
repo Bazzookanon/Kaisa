@@ -24,6 +24,16 @@ class ProductController extends Controller
         return view('product.index', compact('products', 'categories'));
     }
 
+    public function list()
+    {
+        $products = Product::with('category')->get();
+        $categories = Category::all();
+        $categories->each(function ($category) {
+            $category->products_count = $category->products()->count();
+        });
+        return view('product.index', compact('products', 'categories'));
+    }
+
     /**
      * Show the form for creating a new resource.
      *

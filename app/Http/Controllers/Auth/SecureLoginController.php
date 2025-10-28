@@ -49,7 +49,6 @@ class SecureLoginController extends Controller
         
         // Check if user exists
         $user = User::where('email', $credentials['email'])->first();
-        dd($user);
         
         if (!$user) {
             // Even if user doesn't exist, hit the rate limiter to prevent user enumeration
@@ -108,12 +107,12 @@ class SecureLoginController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => 'Login successful',
-                    'redirect' => route('home')
+                    'redirect' => route('products.list')
                 ]);
             }
             
             // Traditional redirect for non-AJAX requests
-            return redirect()->intended(route('home'))->with('success', 'Login successful');
+            return redirect()->intended(route('products.list'))->with('success', 'Login successful');
         }
 
         // Failed login attempt
@@ -140,11 +139,13 @@ class SecureLoginController extends Controller
         $maxAttempts = 5;
         $lockoutTime = 30; // minutes
         
-        $recentFailedAttempts = $user->failed_login_attempts()
-            ->where('created_at', '>', now()->subMinutes($lockoutTime))
-            ->count();
-            
-        return $recentFailedAttempts >= $maxAttempts;
+        // Check if user has too many failed attempts within the lockout time
+        if ($user->failed_attempts >= $maxAttempts && $user->last_failed_attempt) {
+            $timeSinceLastAttempt = now()->diffInMinutes($user->last_failed_attempt);
+            return $timeSinceLastAttempt < $lockoutTime;
+        }
+        
+        return false;
     }
 
     /**
@@ -180,17 +181,45 @@ class SecureLoginController extends Controller
      */
     public function logout(Request $request)
     {
-        $userId = Auth::id();
-        
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-        
-        Log::info('User logged out', [
-            'user_id' => $userId,
-            'ip' => $request->ip()
-        ]);
-        
-        return redirect('/login')->with('success', 'You have been logged out successfully.');
+        try {
+            $userId = Auth::id();
+            
+            // Clear authentication
+            Auth::logout();
+            
+            // Invalidate the session
+            $request->session()->invalidate();
+            
+            // Regenerate the CSRF token
+            $request->session()->regenerateToken();
+            
+            // Clear any remember me cookies
+            if ($request->hasCookie(Auth::getRecallerName())) {
+                $cookie = cookie()->forget(Auth::getRecallerName());
+                return redirect()->route('login')
+                    ->with('success', 'You have been logged out successfully.')
+                    ->withCookie($cookie);
+            }
+            
+            Log::info('User logged out successfully', [
+                'user_id' => $userId,
+                'ip' => $request->ip()
+            ]);
+            
+            return redirect()->route('login')->with('success', 'You have been logged out successfully.');
+            
+        } catch (\Exception $e) {
+            Log::error('Logout error: ' . $e->getMessage(), [
+                'user_id' => Auth::id(),
+                'ip' => $request->ip(),
+                'error' => $e->getMessage()
+            ]);
+            
+            // Force logout even if there's an error
+            Auth::logout();
+            $request->session()->flush();
+            
+            return redirect()->route('login')->with('error', 'There was an issue logging out, but you have been signed out.');
+        }
     }
 }
