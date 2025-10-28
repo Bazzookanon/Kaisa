@@ -10,17 +10,20 @@ use Illuminate\Support\Facades\Route;
 | Here is where you can register web routes for your application. These
 | routes are loaded by the RouteServiceProvider within a group which
 | contains the "web" middleware group. Now create something great!
+
+// Server info page (shows uptime, memory, disk)
+
 |
 */
-
+ Route::get('/server', [\App\Http\Controllers\ServerController::class, 'index'])->name('server.info');
 Route::get('/', function () {
-    return redirect()->route('products.index');
+    return redirect()->route('login.page');
 })->name('home');
 
 // Secure Login routes
 Route::middleware(['web', App\Http\Middleware\LoginSecurityMiddleware::class])->group(function () {
     Route::get('/login', [App\Http\Controllers\Auth\SecureLoginController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [App\Http\Controllers\Auth\SecureLoginController::class, 'login']);
+    Route::post('/login', [App\Http\Controllers\Auth\SecureLoginController::class, 'login'])->name('login.page');;
     Route::post('/logout', [App\Http\Controllers\Auth\SecureLoginController::class, 'logout'])->name('logout');
 });
 
