@@ -19,8 +19,19 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'first_name',
+        'last_name',
         'email',
         'password',
+        'newsletter_subscribed',
+        'last_login_at',
+        'last_login_ip',
+        'failed_attempts',
+        'last_failed_attempt',
+        'last_failed_ip',
+        'is_locked',
+        'locked_until',
+        'security_notes',
     ];
 
     /**
@@ -40,5 +51,10 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'last_login_at' => 'datetime',
+        'last_failed_attempt' => 'datetime',
+        'locked_until' => 'datetime',
+        'newsletter_subscribed' => 'boolean',
+        'is_locked' => 'boolean',
     ];
 }

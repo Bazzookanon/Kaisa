@@ -17,6 +17,19 @@ Route::get('/', function () {
     return redirect()->route('products.index');
 })->name('home');
 
+// Secure Login routes
+Route::middleware(['web', App\Http\Middleware\LoginSecurityMiddleware::class])->group(function () {
+    Route::get('/login', [App\Http\Controllers\Auth\SecureLoginController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [App\Http\Controllers\Auth\SecureLoginController::class, 'login']);
+    Route::post('/logout', [App\Http\Controllers\Auth\SecureLoginController::class, 'logout'])->name('logout');
+});
+
+// Registration routes
+Route::middleware(['web', App\Http\Middleware\LoginSecurityMiddleware::class])->group(function () {
+    Route::get('/register', [App\Http\Controllers\Auth\RegisterController::class, 'showRegistrationForm'])->name('register');
+    Route::post('/register', [App\Http\Controllers\Auth\RegisterController::class, 'register']);
+});
+
 // Route::get('/category', function () {
 //     return view('category.index');
 // })->name('category.index');
